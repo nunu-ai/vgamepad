@@ -7,7 +7,7 @@ import warnings
 
 
 if  platform.system() not in ('Windows', 'Linux'):
-    raise('not on windows or linux')
+    return
 
 VIGEMBUS_VERSION = "1.17.333.0"
 
