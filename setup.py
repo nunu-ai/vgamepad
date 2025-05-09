@@ -6,10 +6,7 @@ import sys
 import warnings
 
 
-if platform.system() not in ('Windows', 'Linux'):
-    continue
-else:
-
+if platform.system() in ('Windows', 'Linux'):
     VIGEMBUS_VERSION = "1.17.333.0"
 
     archstr = platform.machine()
