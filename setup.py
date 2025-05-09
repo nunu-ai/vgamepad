@@ -5,9 +5,8 @@ import subprocess
 import sys
 import warnings
 
-
 if  sys.platform not in ('windows', 'linux'):
-    sys.exit("package only supported on windows and linux")
+    sys.exit(0)
 
 VIGEMBUS_VERSION = "1.17.333.0"
 
@@ -57,6 +56,7 @@ if is_windows:
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
+
 
 setup(
     name='vgamepad',
