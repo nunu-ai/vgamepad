@@ -5,13 +5,6 @@ import subprocess
 import sys
 import warnings
 
-# Early check for Windows platform
-is_windows = platform.system() == 'Windows'
-
-# Silently skip if not on Windows
-if not is_windows and len(sys.argv) > 1 and sys.argv[1] not in ['egg_info', 'sdist', '--help']:
-    # We do nothing and return - this silently exits setup process
-    sys.exit(0)
 
 # The rest of the setup.py only runs on Windows or for certain setup commands
 VIGEMBUS_VERSION = "1.17.333.0"
