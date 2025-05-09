@@ -5,31 +5,35 @@ import subprocess
 import sys
 import warnings
 
-if  sys.platform not in ('windows', 'linux'):
-    sys.exit(0)
-
-VIGEMBUS_VERSION = "1.17.333.0"
-
-archstr = platform.machine()
-if archstr.endswith('64'):
-    arch = "x64"
-elif archstr.endswith('86'):
-    arch = "x86"
-else:
-    if platform.architecture()[0] == "64bit":
-        arch = "x64"
-    else:
-        arch = "x86"
-    warnings.warn(f"vgamepad could not determine your system architecture: \
-                  the vigembus installer will default to {arch}. If this is not your machine architecture, \
-                  please cancel the upcoming vigembus installation and install vigembus manually from \
-                  https://github.com/ViGEm/ViGEmBus/releases/tag/setup-v1.17.333")
-
-pathMsi = Path(__file__).parent.absolute() / "vgamepad" / "win" / "vigem" / "install" / arch / ("ViGEmBusSetup_" + arch + ".msi")
-
+# Early check for Windows platform
 is_windows = platform.system() == 'Windows'
 
+# Silently skip if not on Windows
+if not is_windows and len(sys.argv) > 1 and sys.argv[1] not in ['egg_info', 'sdist', '--help']:
+    # We do nothing and return - this silently exits setup process
+    sys.exit(0)
+
+# The rest of the setup.py only runs on Windows or for certain setup commands
+VIGEMBUS_VERSION = "1.17.333.0"
+
 if is_windows:
+    archstr = platform.machine()
+    if archstr.endswith('64'):
+        arch = "x64"
+    elif archstr.endswith('86'):
+        arch = "x86"
+    else:
+        if platform.architecture()[0] == "64bit":
+            arch = "x64"
+        else:
+            arch = "x86"
+        warnings.warn(f"vgamepad could not determine your system architecture: \
+                    the vigembus installer will default to {arch}. If this is not your machine architecture, \
+                    please cancel the upcoming vigembus installation and install vigembus manually from \
+                    https://github.com/ViGEm/ViGEmBus/releases/tag/setup-v1.17.333")
+
+    pathMsi = Path(__file__).parent.absolute() / "vgamepad" / "win" / "vigem" / "install" / arch / ("ViGEmBusSetup_" + arch + ".msi")
+
     # Try to detect vigembus:
     try:
         registry_str = subprocess.check_output(
@@ -47,16 +51,15 @@ if is_windows:
     except Exception as e:
         vigem_installed = False
         warnings.warn(f"vgamepad could not run the vigembus detection on your system, \
-                      an exception has been caught while trying: \n{e}")
+                    an exception has been caught while trying: \n{e}")
 
     # Prompt installation of the ViGEmBus driver (blocking call)
-    if sys.argv[1] != 'egg_info' and sys.argv[1] != 'sdist':
+    if len(sys.argv) > 1 and sys.argv[1] not in ['egg_info', 'sdist']:
         if not vigem_installed:
             subprocess.call(['msiexec', '/i', '%s' % str(pathMsi)], shell=True)
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
-
 
 setup(
     name='vgamepad',
