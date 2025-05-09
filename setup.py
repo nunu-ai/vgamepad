@@ -6,7 +6,7 @@ import sys
 import warnings
 
 
-if  platform.system() != ('Windows', 'Linux'), "vgamepad is only supported on Windows and Linux.":
+if  platform.system() not in ('Windows', 'Linux'):
     exit()
 
 VIGEMBUS_VERSION = "1.17.333.0"
