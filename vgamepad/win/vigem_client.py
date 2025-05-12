@@ -4,15 +4,38 @@ Adapted from ViGEm source
 
 import platform
 from pathlib import Path
-from ctypes import CDLL, POINTER, CFUNCTYPE, c_void_p, c_uint, c_ushort, c_ulong, c_bool, c_ubyte
-from vgamepad.win.vigem_commons import XUSB_REPORT, DS4_REPORT, DS4_REPORT_EX, VIGEM_TARGET_TYPE
+from ctypes import (
+    CDLL,
+    POINTER,
+    CFUNCTYPE,
+    c_void_p,
+    c_uint,
+    c_ushort,
+    c_ulong,
+    c_bool,
+    c_ubyte,
+)
+import sys
+from webbrowser import get
+from vgamepad.win.vigem_commons import (
+    XUSB_REPORT,
+    DS4_REPORT,
+    DS4_REPORT_EX,
+    VIGEM_TARGET_TYPE,
+)
 
 if platform.architecture()[0] == "64bit":
     arch = "x64"
 else:
     arch = "x86"
 
-pathClient = Path(__file__).parent.absolute() / "vigem" / "client" / arch / "ViGEmClient.dll"
+# For pyinstaller, if this script is frozen, the dll will be in the same directory as the executable
+if getattr(sys, "frozen", False):
+    base_path = Path(sys._MEIPASS)  # type: ignore
+else:
+    base_path = Path(__file__).parent.absolute()
+
+pathClient = base_path / "vigem" / "client" / arch / "ViGEmClient.dll"
 vigemClient = CDLL(str(pathClient))
 
 
@@ -29,7 +52,7 @@ Frees up memory used by the driver connection object
 @param      vigem   The PVIGEM_CLIENT object.
 """
 vigem_free = vigemClient.vigem_free
-vigem_free.argtypes = (c_void_p, )
+vigem_free.argtypes = (c_void_p,)
 vigem_free.restype = None
 
 """
@@ -39,7 +62,7 @@ Returns an error if no compatible bus device has been found.
 @returns	A VIGEM_ERROR.
 """
 vigem_connect = vigemClient.vigem_connect
-vigem_connect.argtypes = (c_void_p, )
+vigem_connect.argtypes = (c_void_p,)
 vigem_connect.restype = c_uint
 
 """
@@ -50,7 +73,7 @@ objects won't be automatically freed, this has to be taken care of by the caller
 @param      vigem	The PVIGEM_CLIENT object.
 """
 vigem_disconnect = vigemClient.vigem_disconnect
-vigem_disconnect.argtypes = (c_void_p, )
+vigem_disconnect.argtypes = (c_void_p,)
 vigem_disconnect.restype = None
 
 """
@@ -77,7 +100,7 @@ terminated.
 @param 	    target	The target device object.
 """
 vigem_target_free = vigemClient.vigem_target_free
-vigem_target_free.argtypes = (c_void_p, )
+vigem_target_free.argtypes = (c_void_p,)
 vigem_target_free.restype = None
 
 """
@@ -129,7 +152,7 @@ Returns the Vendor ID of the provided target device object.
 @returns	The Vendor ID.
 """
 vigem_target_get_vid = vigemClient.vigem_target_get_vid
-vigem_target_get_vid.argtypes = (c_void_p, )
+vigem_target_get_vid.argtypes = (c_void_p,)
 vigem_target_get_vid.restype = c_ushort
 
 """
@@ -138,7 +161,7 @@ Returns the Product ID of the provided target device object.
 @returns	The Product ID.
 """
 vigem_target_get_pid = vigemClient.vigem_target_get_pid
-vigem_target_get_pid.argtypes = (c_void_p, )
+vigem_target_get_pid.argtypes = (c_void_p,)
 vigem_target_get_pid.restype = c_ushort
 
 """
@@ -190,7 +213,7 @@ device.
 @returns	The internally used index of the target device.
 """
 vigem_target_get_index = vigemClient.vigem_target_get_index
-vigem_target_get_index.argtypes = (c_void_p, )
+vigem_target_get_index.argtypes = (c_void_p,)
 vigem_target_get_index.restype = c_ulong
 
 """
@@ -199,7 +222,7 @@ Returns the type of the provided target device object.
 @returns	A VIGEM_TARGET_TYPE.
 """
 vigem_target_get_type = vigemClient.vigem_target_get_type
-vigem_target_get_type.argtypes = (c_void_p, )
+vigem_target_get_type.argtypes = (c_void_p,)
 vigem_target_get_type.restype = VIGEM_TARGET_TYPE
 
 """
@@ -209,7 +232,7 @@ FALSE otherwise.
 @returns	TRUE if device is attached to the bus, FALSE otherwise.
 """
 vigem_target_is_attached = vigemClient.vigem_target_is_attached
-vigem_target_is_attached.argtypes = (c_void_p, )
+vigem_target_is_attached.argtypes = (c_void_p,)
 vigem_target_is_attached.restype = c_bool
 
 """
@@ -236,16 +259,25 @@ target device isn't fully operational or in an erroneous state.
 @param 	userData		The user data passed to the notification callback.
 @returns	A VIGEM_ERROR.
 """
-vigem_target_x360_register_notification = vigemClient.vigem_target_x360_register_notification
-vigem_target_x360_register_notification.argtypes = (c_void_p, c_void_p, c_void_p, c_void_p)
+vigem_target_x360_register_notification = (
+    vigemClient.vigem_target_x360_register_notification
+)
+vigem_target_x360_register_notification.argtypes = (
+    c_void_p,
+    c_void_p,
+    c_void_p,
+    c_void_p,
+)
 vigem_target_x360_register_notification.restype = c_uint
 
 """
 Removes a previously registered callback function from the provided target object.
 @param 	target	The target device object.
 """
-vigem_target_x360_unregister_notification = vigemClient.vigem_target_x360_unregister_notification
-vigem_target_x360_unregister_notification.argtypes = (c_void_p, )
+vigem_target_x360_unregister_notification = (
+    vigemClient.vigem_target_x360_unregister_notification
+)
+vigem_target_x360_unregister_notification.argtypes = (c_void_p,)
 vigem_target_x360_unregister_notification.restype = None
 
 """
@@ -258,14 +290,23 @@ target device isn't fully operational or in an erroneous state.
 @param 	userData		The user data passed to the notification callback.
 @returns	A VIGEM_ERROR.
 """
-vigem_target_ds4_register_notification = vigemClient.vigem_target_ds4_register_notification
-vigem_target_ds4_register_notification.argtypes = (c_void_p, c_void_p, c_void_p, c_void_p)
+vigem_target_ds4_register_notification = (
+    vigemClient.vigem_target_ds4_register_notification
+)
+vigem_target_ds4_register_notification.argtypes = (
+    c_void_p,
+    c_void_p,
+    c_void_p,
+    c_void_p,
+)
 vigem_target_ds4_register_notification.restype = c_uint
 
 """
 Removes a previously registered callback function from the provided target object.
 @param 	target	The target device object.
 """
-vigem_target_ds4_unregister_notification = vigemClient.vigem_target_ds4_unregister_notification
-vigem_target_ds4_unregister_notification.argtypes = (c_void_p, )
+vigem_target_ds4_unregister_notification = (
+    vigemClient.vigem_target_ds4_unregister_notification
+)
+vigem_target_ds4_unregister_notification.argtypes = (c_void_p,)
 vigem_target_ds4_unregister_notification.restype = None
