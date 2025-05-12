@@ -2,6 +2,7 @@
 Adapted from ViGEm source
 """
 
+from importlib.resources import files
 import platform
 from pathlib import Path
 from ctypes import (
@@ -15,7 +16,9 @@ from ctypes import (
     c_bool,
     c_ubyte,
 )
+import shutil
 import sys
+import tempfile
 from webbrowser import get
 from vgamepad.win.vigem_commons import (
     XUSB_REPORT,
@@ -29,14 +32,17 @@ if platform.architecture()[0] == "64bit":
 else:
     arch = "x86"
 
-# For pyinstaller, if this script is frozen, the dll will be in the same directory as the executable
-if getattr(sys, "frozen", False):
-    base_path = Path(sys._MEIPASS)  # type: ignore
-else:
-    base_path = Path(__file__).parent.absolute()
+# For pyinstaller, if this script is frozen we need to correctly link the dlls
+temp_dir = Path(tempfile.gettempdir()) / "vgamepad"
+temp_dir.mkdir(exist_ok=True)
 
-pathClient = base_path / "vigem" / "client" / arch / "ViGEmClient.dll"
-vigemClient = CDLL(str(pathClient))
+dll_source = files("vgamepad.win.vigem.client") / arch / "ViGEmClient.dll"
+dll_target = temp_dir / "ViGEmClient.dll"
+
+if not dll_target.exists():
+    shutil.copy(str(dll_source), dll_target)
+
+vigemClient = CDLL(str(dll_target))
 
 
 """
